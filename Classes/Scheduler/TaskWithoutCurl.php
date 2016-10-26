@@ -3,6 +3,7 @@ namespace DmitryDulepov\DdGooglesitemap\Scheduler;
 
 use DmitryDulepov\DdGooglesitemap\Generator\EntryPoint;
 use TYPO3\CMS\Core\TimeTracker\NullTimeTracker;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
 class TaskWithoutCurl extends AbstractTask
@@ -52,6 +53,7 @@ class TaskWithoutCurl extends AbstractTask
     {
         $this->createSitemapFile();
         $this->createSitemapIndexFile();
+
         return true;
     }
 
@@ -61,6 +63,7 @@ class TaskWithoutCurl extends AbstractTask
     public function getAdditionalInformation()
     {
         $format = $GLOBALS['LANG']->sL('LLL:EXT:dd_googlesitemap/locallang.xml:scheduler.extra_info');
+
         return sprintf($format, $this->indexFilePath);
     }
 
@@ -81,7 +84,9 @@ class TaskWithoutCurl extends AbstractTask
 
     protected function createSitemapFile()
     {
-        file_put_contents(PATH_site . $this->getSitemapFilePath(), $this->getSitemapXml());
+        $sitemapFile = PATH_site . $this->getSitemapFilePath();
+        GeneralUtility::mkdir_deep(dirname($sitemapFile));
+        file_put_contents($sitemapFile, $this->getSitemapXml());
     }
 
     /**
@@ -91,6 +96,7 @@ class TaskWithoutCurl extends AbstractTask
     {
         $fileParts = pathinfo($this->indexFilePath);
         $filePath = $fileParts['dirname'] . '/' . $fileParts['filename'] . '_sitemap.xml';
+
         return $filePath;
     }
 
@@ -112,8 +118,8 @@ class TaskWithoutCurl extends AbstractTask
             ob_end_clean();
 
             // force HTTPS
-            $baseUrl = 'http://'.$sysDomainRow['domainName'];
-            $baseUrlHttps = 'https://'.$sysDomainRow['domainName'];
+            $baseUrl = 'http://' . $sysDomainRow['domainName'];
+            $baseUrlHttps = 'https://' . $sysDomainRow['domainName'];
             $content = str_replace($baseUrl, $baseUrlHttps, $content);
         }
 
