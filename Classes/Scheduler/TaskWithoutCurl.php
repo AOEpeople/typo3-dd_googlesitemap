@@ -111,8 +111,9 @@ class TaskWithoutCurl extends AbstractTask
             $_GET['id'] = $sysDomainRow['pid'];
             $GLOBALS['TT'] = new NullTimeTracker();
 
-            $entryPoint = new EntryPoint();
             ob_start();
+            $entryPoint = new EntryPoint();
+            ob_clean();
             $entryPoint->main();
             $content = ob_get_contents();
             ob_end_clean();
