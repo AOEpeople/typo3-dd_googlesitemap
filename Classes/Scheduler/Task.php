@@ -56,7 +56,7 @@ class Task extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	private $sitemapFileFormat;
 
 	/** @var int */
-	private $offset;
+	protected $offset;
 
 	/**
 	 * Creates the instance of the class. This call initializes the index file
@@ -240,7 +240,7 @@ class Task extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	protected function buildBaseUrl() {
 		$sysDomainRow = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow('domainName', 'sys_domain', 'uid ='. $this->domainRecordId);
 		if (is_array($sysDomainRow)) {
-			$this->baseUrl = 'http://'. $sysDomainRow['domainName'] .'/';
+			$this->baseUrl = 'https://'. $sysDomainRow['domainName'] .'/';
 		}
 	}
 
