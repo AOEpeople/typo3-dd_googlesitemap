@@ -139,6 +139,8 @@ class TaskWithoutCurl extends AbstractTask
             $content = str_replace($baseUrl, $baseUrlHttps, $content);
         }
 
+        header('Content-type: text/html');
+
         return $content;
     }
 }
