@@ -1,6 +1,8 @@
 <?php
 namespace DmitryDulepov\DdGooglesitemap\Scheduler;
 
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Scheduler\AdditionalFieldProviderInterface;
 use TYPO3\CMS\Scheduler\Controller\SchedulerModuleController;
@@ -13,24 +15,26 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
         $task,
         SchedulerModuleController $schedulerModule
     ) {
-
+        /** @var \DmitryDulepov\DdGooglesitemap\Scheduler\Task $task */
         $additionalFields = array();
         $domainRecordId = null;
-        $indexFilePath = '';
 
         if ($task) {
             $domainRecordId = $task->getDomainRecordId();
-            $indexFilePath = $task->getIndexFilePath();
+        } else {
+            $task = GeneralUtility::makeInstance(TaskWithoutCurl::class);
         }
-        $additionalFields['domainRecord'] = array(
-            'code' => '<select class="wide" type="text" name="tx_scheduler[domainRecord]">' .
+        $indexFilePath = $task->getIndexFilePath();
+
+        $additionalFields['domainRecord_withoutCurl'] = array(
+            'code' => '<select class="wide" type="text" name="tx_scheduler[domainRecord_withoutCurl]">' .
                 $this->buildSelectItems($domainRecordId) . '</select>',
             'label' => 'LLL:EXT:dd_googlesitemap/locallang.xml:scheduler.domainRecordLabel',
             'cshKey' => '',
             'cshLabel' => ''
         );
-        $additionalFields['indexFilePath'] = array(
-            'code' => '<input class="wide" type="text" name="tx_scheduler[indexFilePath]" value="' .
+        $additionalFields['indexFilePath_withoutCurl'] = array(
+            'code' => '<input class="wide" type="text" name="tx_scheduler[indexFilePath_withoutCurl]" value="' .
                 htmlspecialchars($indexFilePath) . '" />',
             'label' => 'LLL:EXT:dd_googlesitemap/locallang.xml:scheduler.indexFieldLabel',
             'cshKey' => '',
@@ -72,8 +76,9 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
      */
     public function saveAdditionalFields(array $submittedData, AbstractTask $task)
     {
-        $task->setDomainRecordId($submittedData['domainRecord']);
-        $task->setIndexFilePath($submittedData['indexFilePath']);
+        /** @var \DmitryDulepov\DdGooglesitemap\Scheduler\Task $task */
+        $task->setDomainRecordId($submittedData['domainRecord_withoutCurl']);
+        $task->setIndexFilePath($submittedData['indexFilePath_withoutCurl']);
     }
 
     /**
@@ -84,14 +89,9 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
      */
     protected function addErrorMessage($message)
     {
-        $flashMessage = GeneralUtility::makeInstance(
-            'TYPO3\\CMS\\Core\\Messaging\\FlashMessage',
-            $message,
-            '',
-            \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR
-        );
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', FlashMessage::ERROR);
         /** @var \TYPO3\CMS\Core\Messaging\FlashMessage $flashMessage */
-        $flashMessageService = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Messaging\\FlashMessageService');
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
         /** @var \TYPO3\CMS\Core\Messaging\FlashMessageService $flashMessageService */
         $flashMessageService->getMessageQueueByIdentifier()->enqueue($flashMessage);
     }
@@ -104,13 +104,13 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
      */
     protected function validateDomainRecord(array &$submittedData, array &$errors)
     {
-        if (array_key_exists('domainRecord', $submittedData)) {
-            $submittedData['domainRecord'] = intval($submittedData['domainRecord']);
-            if ($submittedData['domainRecord'] <= 0) {
+        if (array_key_exists('domainRecord_withoutCurl', $submittedData)) {
+            $submittedData['domainRecord_withoutCurl'] = intval($submittedData['domainRecord_withoutCurl']);
+            if ($submittedData['domainRecord_withoutCurl'] <= 0) {
                 $errors[] = 'scheduler.error.missingHost';
             } else {
                 $sysDomainRow = $GLOBALS['TYPO3_DB']
-                    ->exec_SELECTgetSingleRow('uid', 'sys_domain', 'uid =' . $submittedData['domainRecord']);
+                    ->exec_SELECTgetSingleRow('uid', 'sys_domain', 'uid =' . $submittedData['domainRecord_withoutCurl']);
                 if (!is_array($sysDomainRow)) {
                     $errors[] = 'scheduler.error.missingHost';
                 }
@@ -127,11 +127,11 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
      */
     protected function validateIndexFilePath(array &$submittedData, array &$errors)
     {
-        if (array_key_exists('indexFilePath', $submittedData)) {
-            if (GeneralUtility::isAbsPath($submittedData['indexFilePath'])) {
+        if (array_key_exists('indexFilePath_withoutCurl', $submittedData)) {
+            if (GeneralUtility::isAbsPath($submittedData['indexFilePath_withoutCurl'])) {
                 $errors[] = 'scheduler.error.badIndexFilePath';
             } else {
-                $testPath = GeneralUtility::getFileAbsFileName($submittedData['indexFilePath'], true);
+                $testPath = GeneralUtility::getFileAbsFileName($submittedData['indexFilePath_withoutCurl'], true);
                 if (!file_exists($testPath)) {
                     if (!@touch($testPath)) {
                         $errors[] = 'scheduler.error.badIndexFilePath';
