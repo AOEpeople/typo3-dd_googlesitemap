@@ -27,14 +27,14 @@ class AdditionalFieldsProviderWithoutCurl implements AdditionalFieldProviderInte
         $indexFilePath = $task->getIndexFilePath();
 
         $additionalFields['domainRecord_withoutCurl'] = array(
-            'code' => '<select class="wide" type="text" name="tx_scheduler[domainRecord_withoutCurl]">' .
+            'code' => '<select class="wide form-control" type="text" name="tx_scheduler[domainRecord_withoutCurl]">' .
                 $this->buildSelectItems($domainRecordId) . '</select>',
             'label' => 'LLL:EXT:dd_googlesitemap/locallang.xml:scheduler.domainRecordLabel',
             'cshKey' => '',
             'cshLabel' => ''
         );
         $additionalFields['indexFilePath_withoutCurl'] = array(
-            'code' => '<input class="wide" type="text" name="tx_scheduler[indexFilePath_withoutCurl]" value="' .
+            'code' => '<input class="wide form-control" type="text" name="tx_scheduler[indexFilePath_withoutCurl]" value="' .
                 htmlspecialchars($indexFilePath) . '" />',
             'label' => 'LLL:EXT:dd_googlesitemap/locallang.xml:scheduler.indexFieldLabel',
             'cshKey' => '',
