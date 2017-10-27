@@ -8,11 +8,26 @@ use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
 class TaskWithoutCurl extends AbstractTask
 {
+    const DEFAULT_FILE_PATH = 'typo3temp/dd_googlesitemap';
+
     /** @var string */
     protected $indexFilePath;
 
     /** @var integer */
     protected $domainRecordId;
+
+    /**
+     * Creates the instance of the class. This call initializes the index file
+     * path to the random value. After the task is configured, the user may
+     * change the file and the file name will be serialized with the task and
+     * used later.
+     *
+     * @see __sleep
+     */
+    public function __construct() {
+        parent::__construct();
+        $this->indexFilePath = self::DEFAULT_FILE_PATH . '/' . GeneralUtility::getRandomHexString(24) . '.xml';
+    }
 
     /**
      * @param string $indexFilePath
@@ -123,6 +138,8 @@ class TaskWithoutCurl extends AbstractTask
             $baseUrlHttps = 'https://' . $sysDomainRow['domainName'];
             $content = str_replace($baseUrl, $baseUrlHttps, $content);
         }
+
+        header('Content-type: text/html');
 
         return $content;
     }
