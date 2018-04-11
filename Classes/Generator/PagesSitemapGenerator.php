@@ -142,7 +142,7 @@ class PagesSitemapGenerator extends AbstractSitemapGenerator {
 			// first, second, etc pages of the top level pages and so on.
 			//
 			// Notice: no sorting (for speed)!
-			$GLOBALS['TSFE']->sys_page->sys_language_uid = $GLOBALS['TSFE']->config['config']['sys_language_uid'];
+			$GLOBALS['TSFE']->sys_page->sys_language_uid = (int)$GLOBALS['TSFE']->config['config']['sys_language_uid'];
 			$morePages = $GLOBALS['TSFE']->sys_page->getMenu($pageInfo['uid'], '*', '', '', false);
 			$this->removeNonTranslatedPages($morePages);
 			$this->pageList = array_merge($this->pageList, array_values($morePages));
