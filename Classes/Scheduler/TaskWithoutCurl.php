@@ -124,7 +124,12 @@ class TaskWithoutCurl extends AbstractTask
         $sysDomainRow = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow('pid, domainName', 'sys_domain', 'uid ='. $this->domainRecordId);
         if (is_array($sysDomainRow)) {
             $_GET['id'] = $sysDomainRow['pid'];
-            $GLOBALS['TT'] = new NullTimeTracker();
+            // If this task is called over cli, the HTTP_HOST is not set
+            if (false === isset($_SERVER['HTTP_HOST']) || empty($_SERVER['HTTP_HOST'])) {
+                $_SERVER['HTTP_HOST'] = $sysDomainRow['domainName'];
+            }
+
+	    $GLOBALS['TT'] = new NullTimeTracker();
 
             ob_start();
             $entryPoint = new EntryPoint();
